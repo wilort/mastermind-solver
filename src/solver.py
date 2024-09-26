@@ -1,10 +1,11 @@
 import random
 from typing import List
 from pydantic import BaseModel
+from enum import Enum
 
 #https://webgamesonline.com/codebreaker/rules.php
 
-class Colors(BaseModel):
+class Colors(Enum):
     RED: str = "RED"
     BLUE: str = "BLUE"
     GREEN: str = "GREEN"
@@ -14,7 +15,7 @@ class Colors(BaseModel):
     WHITE: str = "WHITE"
     BLACK: str = "BLACK"
 
-class PegColors(BaseModel):
+class PegColors(Enum):
     RED: str = "RED" # correct color and position
     WHITE: str = "WHITE" # correct color but wrong position
     NONE: str = "NONE" # color not in solution
@@ -25,7 +26,11 @@ class Mastermind:
     allow_duplicates: bool = True
 
     def new_game(self) -> List[Colors]:
-        self.solution = [random.choice(Colors.model_fields.keys()) for _ in range(self.code_length)]
+        colors = list(Colors)
+        if self.allow_duplicates:
+            self.solution = random.choices(colors, k=self.code_length)
+        else:
+            self.solution = random.sample(colors, k=self.code_length)
 
     def check_solution(self, guess: List[Colors]) -> bool:
         return guess == self.solution
