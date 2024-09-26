@@ -2,7 +2,7 @@ import random
 from typing import Tuple, List
 import pulp
 
-from mastermind import Colors
+from src.mastermind import Colors
 
 class MastermindSolver:
 
@@ -12,9 +12,9 @@ class MastermindSolver:
     def create_guess(self) -> list[Colors]:
         colors = list(Colors)
         if self.mastermind.allow_duplicates:
-            guess = random.choices(colors, k=self.code_length)
+            guess = random.choices(colors, k=self.mastermind.code_length)
         else:
-            guess = random.sample(colors, k=self.code_length)
+            guess = random.sample(colors, k=self.mastermind.code_length)
         return guess
 
     def solve(self, quiet=True) -> Tuple[List[Colors], int]:
@@ -31,9 +31,16 @@ class MastermindSolver:
 
         ball_ids = range(1, self.mastermind.code_length + 1)
         color_ids = list(Colors)
+
+        # the variable x[b][c] is 1 iff ball b has color c
         x = pulp.LpVariable.dicts(name = "x",
                               indices = (ball_ids, color_ids),
                               cat = "Binary")
+        
+        # the variable y[c] is 1 iff color c exists in the solution
+        y = pulp.LpVariable.dicts(name = "y",
+                                indices = color_ids,
+                                cat = "Binary")
         constraints = []
 
         # create the general constraint:
@@ -41,6 +48,13 @@ class MastermindSolver:
         num_chosen_balls = pulp.lpSum(x[b][c] for b in ball_ids for c in color_ids)
         constraint = num_chosen_balls == self.mastermind.code_length, ""
         constraints.append(constraint)
+
+        for c in color_ids:
+            constraint = y[c] <= pulp.lpSum(x[b][c] for b in ball_ids), ""
+            constraints.append(constraint)
+            constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 4*y[c], ""
+            constraints.append(constraint)
+
 
         while hint != [Colors.RED]*self.mastermind.code_length:
             iterations += 1
@@ -55,23 +69,20 @@ class MastermindSolver:
                 constraints.append(constraint)
 
 
-            # color none represents the number of ball colors not in the solution
+            # color none represents the number of ball colors not in the solution at all
             num_balls_not_in_solution = hint.count(Colors.NONE)
             if num_balls_not_in_solution > 0:
-                constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) == num_balls_not_in_solution , ""
+                constraint = pulp.lpSum(1 - y[c] for c in guess) == num_balls_not_in_solution , ""
                 constraints.append(constraint)
-
 
             # num white represents the number of correct ball colors but in the wrong position
             num_balls_in_wrong_position = hint.count(Colors.WHITE)
             if num_balls_in_wrong_position > 0:
-                    
-                    guess_sum = pulp.lpSum(x[b][c] for b,c in enumerate(guess))
-                    guess_sum_neg = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess))
 
-                    constraint = guess_sum == num_balls_in_wrong_position, ""
-                    constraints.append(constraint)
-            
+                # if x balls are in the wrong position we know that the inverse sum of the balls will b x
+                constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) == num_balls_in_wrong_position , ""
+                constraints.append(constraint)
+
             # add the constraints
             prob += constraints
 
