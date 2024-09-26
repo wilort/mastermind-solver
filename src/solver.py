@@ -1,104 +1,95 @@
 import random
-from typing import List
-from pydantic import BaseModel
-from enum import Enum
+from typing import Tuple, List
+import pulp
 
-#https://webgamesonline.com/codebreaker/rules.php
+from mastermind import Colors
 
-class Colors(Enum):
-    RED: str = "RED"
-    BLUE: str = "BLUE"
-    GREEN: str = "GREEN"
-    YELLOW: str = "YELLOW"
-    ORANGE: str = "ORANGE"
-    BROWN: str = "BROWN"
-    WHITE: str = "WHITE"
-    BLACK: str = "BLACK"
+class MastermindSolver:
 
-class PegColors(Enum):
-    RED: str = "RED" # correct color and position
-    WHITE: str = "WHITE" # correct color but wrong position
-    NONE: str = "NONE" # color not in solution
-
-class Mastermind:
-
-    code_length: int = 4
-    allow_duplicates: bool = True
-
-    def new_game(self) -> List[Colors]:
-        colors = list(Colors)
-        if self.allow_duplicates:
-            self.solution = random.choices(colors, k=self.code_length)
-        else:
-            self.solution = random.sample(colors, k=self.code_length)
-
-    def check_solution(self, guess: List[Colors]) -> bool:
-        return guess == self.solution
+    def __init__(self, mastermind):
+        self.mastermind = mastermind
     
-    def get_hint(self, guess: List[Colors]) -> List[PegColors]:
-        hint = []
-        for i, color in enumerate(guess):
-            if color == self.solution[i]:
-                hint.append(PegColors.RED)
-            elif color in self.solution:
-                hint.append(PegColors.WHITE)
+    def create_guess(self) -> list[Colors]:
+        colors = list(Colors)
+        if self.mastermind.allow_duplicates:
+            guess = random.choices(colors, k=self.code_length)
+        else:
+            guess = random.sample(colors, k=self.code_length)
+        return guess
+
+    def solve(self, quiet=True) -> Tuple[List[Colors], int]:
+
+        # create random guess
+        guess = self.create_guess()
+        iterations = 0
+
+        # get hint
+        hint = self.mastermind.get_hint(guess)
+
+        if hint == [Colors.RED]*self.mastermind.code_length:
+            return guess
+
+        ball_ids = range(1, self.mastermind.code_length + 1)
+        color_ids = list(Colors)
+        x = pulp.LpVariable.dicts(name = "x",
+                              indices = (ball_ids, color_ids),
+                              cat = "Binary")
+        constraints = []
+
+        # create the general constraint:
+        # Total numbers of balls should be equal to the code length
+        num_chosen_balls = pulp.lpSum(x[b][c] for b in ball_ids for c in color_ids)
+        constraint = num_chosen_balls == self.mastermind.code_length, ""
+        constraints.append(constraint)
+
+        while hint != [Colors.RED]*self.mastermind.code_length:
+            iterations += 1
+
+            prob = pulp.LpProblem("mastermind_problem", pulp.LpMinimize)
+            self.prob += 0, "Objective_Function"
+
+            # color red represents the number of correct ball colors in the correct position
+            num_balls_in_correct_position = hint.count(Colors.RED)
+            if num_balls_in_correct_position > 0:
+                constraint = pulp.lpSum(x[b][c] for b,c in enumerate(guess)) == num_balls_in_correct_position , ""
+                constraints.append(constraint)
+
+
+            # color none represents the number of ball colors not in the solution
+            num_balls_not_in_solution = hint.count(Colors.NONE)
+            if num_balls_not_in_solution > 0:
+                constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) == num_balls_not_in_solution , ""
+                constraints.append(constraint)
+
+
+            # num white represents the number of correct ball colors but in the wrong position
+            num_balls_in_wrong_position = hint.count(Colors.WHITE)
+            if num_balls_in_wrong_position > 0:
+                    
+                    guess_sum = pulp.lpSum(x[b][c] for b,c in enumerate(guess))
+                    guess_sum_neg = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess))
+
+                    constraint = guess_sum == num_balls_in_wrong_position, ""
+                    constraints.append(constraint)
+            
+            # add the constraints
+            prob += constraints
+
+            # solve the problem
+            if quiet:
+                prob.solve(pulp.PULP_CBC_CMD(timeLimit=60, msg=False))
             else:
-                hint.append(PegColors.NONE)
-        # shuffle the hint
-        random.shuffle(hint)
-        return hint
+                prob.solve()
 
-# class Model:
+            # get the new guess
+            
+            new_guess = []
+            for b in ball_ids:
+                for c in color_ids:
+                    if x[b][c].varValue == 1:
+                        new_guess.append(c)
 
-#     def __init__(
-#             self,
-#             tasks: list[Task],
-#             workers: list[Worker],
-#             settings: Settings = Settings(),
-#             costs: Costs = Costs()
-#             ):
-
-#         self.settings = settings
-#         self.costs = costs
-#         self.tasks = tasks
-#         self.workers = workers
-#         self.worker_ids = [worker.id for worker in self.workers]
-#         self.task_ids = [task.id for task in self.tasks]
-
-#         self.prob = pulp.LpProblem("schedule_problem", pulp.LpMinimize)
-#         self.objective_function = 0
-#         self.constraints = []
-
-#         # This variable indicates if a worker is assigned a task
-#         self.x = pulp.LpVariable.dicts(name = "x",
-#                              indices = (self.worker_ids, self.task_ids),
-#                              cat = "Binary")
-
-         
-#         # Add some constraints
-#         for worker in self.workers:
-#             if worker.pre_assigned_tasks:
-#                 for task in worker.pre_assigned_tasks:
-#                     constraint = self.x[worker.id][task.id] == 1, ""
-#                     self.constraints.append(constraint)
-
-#         # Creating the objective function
-#         self.prob += self.objective_function, "Objective_Function"
-
-#         # Adding the constraints
-#         for constraint in self.constraints:
-#             self.prob += constraint
-
-#     def solve(self, quiet=True):
-#         if quiet:
-#             self.prob.solve(pulp.PULP_CBC_CMD(timeLimit=60, msg=False))
-#         else:
-#             self.prob.solve()
-
-#     def get_results(self):
-#         unassigned_tasks = []
-#         for task in self.tasks:
-#             task_is_not_assigned = sum(self.x[worker.id][task.id].varValue for worker in self.workers) == 0
-#             if task_is_not_assigned:
-#                 unassigned_tasks.append(task)
-#         return unassigned_tasks
+            guess = new_guess
+            hint = self.mastermind.get_hint(guess)
+        
+        return guess, iterations

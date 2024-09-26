@@ -1,4 +1,4 @@
-from src.solver import Mastermind, Colors, PegColors
+from src.mastermind import Mastermind, Colors, PegColors
 from unittest import mock
 from pytest import fixture
 

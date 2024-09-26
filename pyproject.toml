@@ -11,6 +11,7 @@ python = "^3.12"
 pydantic = "^2.9.2"
 pytest = "^8.3.3"
 mock = "^5.1.0"
+pulp = "^2.9.0"
 
 
 [build-system]
