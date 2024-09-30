@@ -8,7 +8,7 @@ class MastermindSolver:
 
     def __init__(self, mastermind):
         self.mastermind = mastermind
-    
+
     def create_guess(self) -> list[Colors]:
         colors = list(Colors)
         if self.mastermind.allow_duplicates:
@@ -17,7 +17,7 @@ class MastermindSolver:
             guess = random.sample(colors, k=self.mastermind.code_length)
         return guess
 
-    def solve(self, quiet=True) -> Tuple[List[Colors], int]:
+    def solve(self, quiet=True, write_lp_file=True) -> Tuple[List[Colors], int]:
 
         iterations = 0
 
@@ -48,17 +48,32 @@ class MastermindSolver:
             constraint = pulp.lpSum(x[b][c] for c in color_ids) == 1, ""
             constraints.append(constraint)
 
-        # 2. force binary y[c] to be 1 if the color is used in any ball position
+        # 2. force binary y[c] to be 1 iff the color is used in any ball position
         for c in color_ids:
             constraint = y[c] <= pulp.lpSum(x[b][c] for b in ball_ids), ""
             constraints.append(constraint)
             constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 100000*y[c], ""
             constraints.append(constraint)
 
+        # 3. if duplicates are allowed, we can add a constraint that the number of colors used
+        # must be less or equal to the number of colors in the solution.
+        # if duplicates are not allowed, the number of colors used must be equal to the number of colors in the solution.
+        if self.mastermind.allow_duplicates:
+            constraint = pulp.lpSum(y[c] for c in color_ids) <= self.mastermind.code_length, ""
+            constraints.append(constraint)
+        else:
+            constraint = pulp.lpSum(y[c] for c in color_ids) == self.mastermind.code_length, ""
+            constraints.append(constraint)
+
+            # a color can only be chosen once
+            #for c in color_ids:
+            #    constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 1, ""
+            #    constraints.append(constraint)
+
         while any(h != PegColors.RED for h in hint):
             iterations += 1
 
-            if iterations > 100:
+            if iterations > 10:
                 raise Exception("Too many iterations")
 
             prob = pulp.LpProblem("mastermind_problem", pulp.LpMinimize)
@@ -66,23 +81,20 @@ class MastermindSolver:
 
 
             # color red represents the number of correct ball colors in the correct position
-            num_balls_in_correct_position = hint.count(PegColors.RED)
-            if num_balls_in_correct_position > 0:
-                constraint = pulp.lpSum(x[b][c] for b,c in enumerate(guess)) == num_balls_in_correct_position , ""
+            if hint.count(PegColors.RED) > 0:
+                constraint = pulp.lpSum(x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.RED) , ""
                 constraints.append(constraint)
 
 
-            # color none represents the number of ball colors not in the solution at all
-            num_balls_not_in_solution = hint.count(PegColors.NONE)
-            if num_balls_not_in_solution > 0:
-                constraint = pulp.lpSum(1 - y[c] for c in guess) == num_balls_not_in_solution , ""
+            # color non represents the number of colors that are not in the solution
+            if hint.count(PegColors.NONE) > 0:
+                constraint = pulp.lpSum(1 - y[c] for c in guess) == hint.count(PegColors.NONE), ""
                 constraints.append(constraint)
 
 
-            # num white represents the number of correct ball colors but in the wrong position
-            num_balls_in_wrong_position = hint.count(PegColors.WHITE)
-            if num_balls_in_wrong_position > 0:
-                constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) == num_balls_in_wrong_position , ""
+            # color white represents the number of correct ball colors but in the wrong position
+            if hint.count(PegColors.WHITE) > 0:
+                constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) >= hint.count(PegColors.WHITE) , ""
                 constraints.append(constraint)
 
 
@@ -90,8 +102,8 @@ class MastermindSolver:
             for c in constraints:
                 prob += c
 
-
-            prob.writeLP(f"tmp/model_{iterations}.lp")
+            if write_lp_file:
+                prob.writeLP(f"tmp/model_{iterations}.lp")
 
             # solve the problem
             if quiet:
@@ -101,16 +113,9 @@ class MastermindSolver:
 
             status = pulp.LpStatus[prob.status]
 
-            # # reality check
-            # for b in ball_ids:
-            #     if sum(x[b][c].varValue for c in color_ids) != 1:
-            #         lol = [x[b][c].varValue for c in color_ids]
-            #         raise Exception(f"Reality check failed for ball {b}. Values: {lol}")
-
             if status != "Optimal":
-                raise Exception(f"No optimal solution found. Status: {status}")
+                raise Exception(f"No optimal solution found. Status: {status}, iterations: {iterations}, guess: {guess}, hint: {hint}")
 
-            # get the new guess
             new_guess = self.mastermind.code_length*[None]
             for b in ball_ids:
                 for c in color_ids:
