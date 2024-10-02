@@ -31,6 +31,8 @@ class MastermindSolver:
         ball_ids = range(self.mastermind.code_length)
         color_ids = list(Colors)
 
+        prob = pulp.LpProblem("mastermind_problem", pulp.LpMinimize)
+
         # the variable x[b][c] is 1 iff ball b has color c
         x = pulp.LpVariable.dicts(name = "x",
                               indices = (ball_ids, color_ids),
@@ -40,30 +42,32 @@ class MastermindSolver:
         y = pulp.LpVariable.dicts(name = "y",
                                 indices = color_ids,
                                 cat = "Binary")
-        constraints = []
+
+        # for some reason we need to set this to something. not sure why?
+        prob += x[0][Colors.RED], "Objective_Function" 
 
         # create some general constraints:
         # 1. each ball position has exactly one color
         for b in ball_ids:
             constraint = pulp.lpSum(x[b][c] for c in color_ids) == 1, ""
-            constraints.append(constraint)
+            prob += constraint
 
         # 2. force binary y[c] to be 1 iff the color is used in any ball position
         for c in color_ids:
             constraint = y[c] <= pulp.lpSum(x[b][c] for b in ball_ids), ""
-            constraints.append(constraint)
+            prob += constraint
             constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 100000*y[c], ""
-            constraints.append(constraint)
+            prob += constraint
 
         # 3. if duplicates are allowed, we can add a constraint that the number of colors used
         # must be less or equal to the number of colors in the solution.
         # if duplicates are not allowed, the number of colors used must be equal to the number of colors in the solution.
         if self.mastermind.allow_duplicates:
             constraint = pulp.lpSum(y[c] for c in color_ids) <= self.mastermind.code_length, ""
-            constraints.append(constraint)
+            prob += constraint
         else:
             constraint = pulp.lpSum(y[c] for c in color_ids) == self.mastermind.code_length, ""
-            constraints.append(constraint)
+            prob += constraint
 
             # a color can only be chosen once
             #for c in color_ids:
@@ -76,31 +80,22 @@ class MastermindSolver:
             if iterations > 10:
                 raise Exception("Too many iterations")
 
-            prob = pulp.LpProblem("mastermind_problem", pulp.LpMinimize)
-            prob += x[b][Colors.RED], "Objective_Function" # for some reason we need to set this to something. not sure why?
-
-
             # color red represents the number of correct ball colors in the correct position
             if hint.count(PegColors.RED) > 0:
                 constraint = pulp.lpSum(x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.RED) , ""
-                constraints.append(constraint)
+                prob += constraint
 
 
             # color non represents the number of colors that are not in the solution
             if hint.count(PegColors.NONE) > 0:
                 constraint = pulp.lpSum(1 - y[c] for c in guess) == hint.count(PegColors.NONE), ""
-                constraints.append(constraint)
+                prob += constraint
 
 
             # color white represents the number of correct ball colors but in the wrong position
             if hint.count(PegColors.WHITE) > 0:
                 constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) >= hint.count(PegColors.WHITE) , ""
-                constraints.append(constraint)
-
-
-            # add the constraints
-            for c in constraints:
-                prob += c
+                prob += constraint
 
             if write_lp_file:
                 prob.writeLP(f"tmp/model_{iterations}.lp")

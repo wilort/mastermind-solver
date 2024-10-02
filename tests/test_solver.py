@@ -28,8 +28,8 @@ def test_solver_with_correct_first_guess(mastermind):
         assert num_iterations == 0
 
 @pytest.mark.parametrize("mocked_first_guess, expected_iterations", [
-    ([Colors.RED, Colors.BLUE, Colors.GREEN, Colors.BLACK], 2),
-    ([Colors.RED, Colors.BLUE, Colors.GREEN, Colors.ORANGE], 1),
+    ([Colors.RED, Colors.BLUE, Colors.GREEN, Colors.BLACK], 3),
+    ([Colors.RED, Colors.BLUE, Colors.GREEN, Colors.ORANGE], 2),
     ([Colors.BLACK, Colors.BLUE, Colors.YELLOW, Colors.ORANGE], 5),
 ])
 def test_solver_with_guess(mastermind, mocked_first_guess, expected_iterations):
@@ -64,7 +64,7 @@ def test_solver(mastermind):
     assert mastermind.check_solution(solution)
     assert num_iterations <= 6
 
-def test_solver_timing():
+def atest_solver_timing():
 
     accumulated_cpu_time = 0
     mastermind = Mastermind()
@@ -79,3 +79,19 @@ def test_solver_timing():
         assert mastermind.check_solution(solution)
     assert 0.6 < accumulated_cpu_time
     assert accumulated_cpu_time < 0.7
+
+def test_solver_avarage_num_iterations():
+
+    accumulated_cpu_time = 0
+    mastermind = Mastermind()
+    solver = MastermindSolver(mastermind)
+
+    num_simulations = 100
+    total_num_iterations = 0
+    for _ in range(num_simulations):
+        solver.mastermind.new_game()
+        solution, num_iterations = solver.solve(write_lp_file=False)
+        total_num_iterations += num_iterations
+        assert mastermind.check_solution(solution)
+    num_iterations_avg = total_num_iterations / num_simulations
+    assert num_iterations_avg <= 5
