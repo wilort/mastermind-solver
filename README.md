@@ -73,15 +73,42 @@ Let $G$ be the guess.
 
 Let $r$ be the number of red colored key pegs.
 $$
-\sum_{b,c \in G} \sum_{x_{bc}} x_{bc} = r
+\sum_{b,c \in G} x_{bc} = r
 $$
 
 Let $n$ be the number of none key pegs.
 $$
-\sum_{c \in G} \sum_{1 - y_{c}} = n
+\sum_{c \in G} 1 - y_c = n
 $$
 
 Let $w$ be the number of white colored key pegs.
 $$
-\sum_{b,c \in G} \sum_{1 - x_{bc}} \geq w
+\sum_{b,c \in G} 1 - x_{bc} \geq w
 $$
+
+
+# TODO:
+1. Allow duplicates
+2. Could the binary variable $y$ be removed?
+
+# experiments
+x_00, x01, x02, x03
+x_10, x11, x12, x13
+x_20, x21, x22, x23
+x_30, x31, x32, x33
+x_40, x41, x42, x43
+x_50, x51, x52, x53
+x_60, x61, x62, x63
+x_70, x71, x72, x73
+
+solution is (1,2,3,4)
+guess is (5,2,7,1)
+then key pegs:
+white, none, none, red
+
+constraints:
+white: 1-x0g + 1-x1g + 1-x2g + 1-x3g <= num white
+
+
+ 
+

@@ -72,13 +72,14 @@ class MastermindSolver:
             # a color can only be chosen once
             #for c in color_ids:
             #    constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 1, ""
-            #    constraints.append(constraint)
+            #    prob += constraint
 
         while any(h != PegColors.RED for h in hint):
             iterations += 1
 
             if iterations > 10:
-                raise Exception("Too many iterations")
+                raise Exception(f"Too many iterations. solution: {self.mastermind.solution}")
+
 
             # color red represents the number of correct ball colors in the correct position
             if hint.count(PegColors.RED) > 0:
@@ -87,6 +88,7 @@ class MastermindSolver:
 
 
             # color non represents the number of colors that are not in the solution
+            # to make this ready for duplicates, us c in set(guess) and rhs = min(unique colors in guess, num none in hint)
             if hint.count(PegColors.NONE) > 0:
                 constraint = pulp.lpSum(1 - y[c] for c in guess) == hint.count(PegColors.NONE), ""
                 prob += constraint
@@ -96,6 +98,8 @@ class MastermindSolver:
             if hint.count(PegColors.WHITE) > 0:
                 constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) >= hint.count(PegColors.WHITE) , ""
                 prob += constraint
+                # perhaps this constraint gives more info?
+                #constraint = pulp.lpSum(y[c] for c in set(guess)) >= hint.count(PegColors.WHITE) , ""
 
             if write_lp_file:
                 prob.writeLP(f"tmp/model_{iterations}.lp")

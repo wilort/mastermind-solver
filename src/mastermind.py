@@ -25,6 +25,10 @@ class Mastermind():
     code_length: int = 4
     allow_duplicates: bool = False # THIS MUST BE FALSE RIGHT NOW
 
+    def __init__(self, code_length: int = 4, allow_duplicates: bool = False):
+        self.code_length = code_length
+        self.allow_duplicates = allow_duplicates
+
     def new_game(self) -> List[Colors]:
         colors = list(Colors)
         if self.allow_duplicates:
@@ -33,7 +37,14 @@ class Mastermind():
             self.solution = random.sample(colors, k=self.code_length)
     
     def set_solution(self, solution: List[Colors]):
-        self.solution = solution
+        if self.allow_duplicates:
+            self.solution = solution
+        else:
+            if len(set(solution)) == len(solution):
+                self.solution = solution
+            else:
+                raise ValueError("Solution must not contain duplicates")
+            
 
     def check_solution(self, guess: List[Colors]) -> bool:
         return guess == self.solution

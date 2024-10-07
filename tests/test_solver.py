@@ -4,6 +4,7 @@ from unittest import mock
 from pytest import fixture
 import pytest
 import time
+import random
 
 @fixture
 def mastermind():
@@ -80,18 +81,46 @@ def atest_solver_timing():
     assert 0.6 < accumulated_cpu_time
     assert accumulated_cpu_time < 0.7
 
-def test_solver_avarage_num_iterations():
+def test_solver_num_iterations():
 
-    accumulated_cpu_time = 0
     mastermind = Mastermind()
     solver = MastermindSolver(mastermind)
+    random.seed(42)
 
     num_simulations = 100
     total_num_iterations = 0
+    max_num_iterations = 0
     for _ in range(num_simulations):
         solver.mastermind.new_game()
         solution, num_iterations = solver.solve(write_lp_file=False)
         total_num_iterations += num_iterations
+        max_num_iterations = max(max_num_iterations, num_iterations)
         assert mastermind.check_solution(solution)
-    num_iterations_avg = total_num_iterations / num_simulations
-    assert num_iterations_avg <= 5
+    assert total_num_iterations == 468
+    assert max_num_iterations == 9
+
+def generate_random_solution_with_duplicates():
+    colors = list(Colors)
+    solution = random.choices(colors, k=4)
+    if len(set(solution)) == len(solution):
+        solution[-1] = solution[0]
+    return solution
+
+def test_solver_num_iterations_with_duplicates():
+
+    mastermind = Mastermind(allow_duplicates=True)
+    solver = MastermindSolver(mastermind)
+    random.seed(42)
+
+    num_simulations = 100
+    total_num_iterations = 0
+    max_num_iterations = 0
+    for _ in range(num_simulations):
+        my_solution = generate_random_solution_with_duplicates()
+        solver.mastermind.set_solution(my_solution)
+        solution, num_iterations = solver.solve(write_lp_file=False)
+        total_num_iterations += num_iterations
+        max_num_iterations = max(max_num_iterations, num_iterations)
+        assert mastermind.check_solution(solution)
+    assert total_num_iterations == 536
+    assert max_num_iterations == 8
