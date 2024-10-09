@@ -95,11 +95,11 @@ class MastermindSolver:
 
 
             # color white represents the number of correct ball colors but in the wrong position
+            # I suspect this constraint is not giving as much information
+            # as it could do.
             if hint.count(PegColors.WHITE) > 0:
                 constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) >= hint.count(PegColors.WHITE) , ""
                 prob += constraint
-                # perhaps this constraint gives more info?
-                #constraint = pulp.lpSum(y[c] for c in set(guess)) >= hint.count(PegColors.WHITE) , ""
 
             if write_lp_file:
                 prob.writeLP(f"tmp/model_{iterations}.lp")
