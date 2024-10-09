@@ -1,10 +1,10 @@
 # mastermind-solver
 <img src=images/mastermind.jpg alt="My Example Image" width="300" height="200" class=center>
 
-The purpose of this project is to show how to solve the mastermind board game
-by using linear programming.
+The purpose of this project is to showcase an algorithm that solves the mastermind board game
+with linear programming.
 
-# Game description rules
+# Game description
 https://en.wikipedia.org/wiki/Mastermind_(board_game)
 
 # Algorithm description
@@ -14,10 +14,9 @@ The game can be solved by setting up a linear optimization model with binary var
 2. Set up the optimization model.
 3. If all key pegs are red go to step 8, else go to step 3
 4. Convert the guess and key pegs into constraints and append them to the model.
-5. Solve the optimization model. The solution represent the new guess.
-6. Generate a new set of key pegs.
-7. Go to step 2.
-8. solution found!
+5. Solve the optimization model. The solution represents a new guess.
+6. Generate a new set of key pegs and go to step 2.
+7. solution found!
 
 # Linear optimization model
 
@@ -45,20 +44,20 @@ y_c =
 $$
 
 Each ball position has exactly one color.
-Thus the following constraint is required.
+Hence, the following constraint is required.
 $$
 \sum_{c \in C} x_{bc} = 1, \text{for all } b \in B
 $$
 
 There can be a maximum of four ball colors in a guess.
-Thus, the following constraint is required.
+Hence, the following constraint is required.
 $$
 \sum_{b \in B} \sum_{c \in C} x_{bc} \leq 4
 $$
 
 The variables x and y are related.
 To force binary $y_c$ to be $1$ if and only if the color is used in any ball position
-Then the following constraints are required.
+Hence, the following constraints are required.
 $$
 y_c \leq \sum_{b \in B} x_{bc}, \text{for all } c \in C
 $$
@@ -90,6 +89,7 @@ $$
 # TODO:
 1. Allow duplicates
 2. Could the binary variable $y$ be removed?
+3. only create the optimization model once. not once per solve call
 
 # experiments
 x_00, x01, x02, x03

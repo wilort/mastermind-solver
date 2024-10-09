@@ -31,16 +31,6 @@ def test_set_solution_with_duplicates_error():
     with pytest.raises(ValueError):
         mastermind.set_solution(solution)
 
-def atest_get_hint(mastermind):
-
-    mastermind.set_solution([C.RED, C.BLUE, C.GREEN, C.YELLOW])
-
-    guess = [C.YELLOW, C.ORANGE, C.GREEN, C.BLACK]
-    hint = mastermind.get_hint(guess)
-
-    assert PC.RED in hint
-    assert hint.count(PC.RED) == 1
-
 @pytest.mark.parametrize("guess, expected_hint", [
     ([C.RED, C.BLUE, C.GREEN, C.YELLOW], [PC.RED, PC.RED, PC.RED, PC.RED]),
     ([C.BLUE, C.RED, C.YELLOW, C.GREEN], [PC.WHITE, PC.WHITE, PC.WHITE, PC.WHITE]),

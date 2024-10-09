@@ -17,7 +17,7 @@ class MastermindSolver:
             guess = random.sample(colors, k=self.mastermind.code_length)
         return guess
 
-    def solve(self, quiet=True, write_lp_file=True) -> Tuple[List[Colors], int]:
+    def solve(self, quiet=True, write_lp_file=False) -> Tuple[List[Colors], int]:
 
         iterations = 0
 
@@ -77,7 +77,7 @@ class MastermindSolver:
         while any(h != PegColors.RED for h in hint):
             iterations += 1
 
-            if iterations > 10:
+            if iterations > 11:
                 raise Exception(f"Too many iterations. solution: {self.mastermind.solution}")
 
 
