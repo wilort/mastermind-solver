@@ -53,26 +53,27 @@ class MastermindSolver:
             prob += constraint
 
         # 2. force binary y[c] to be 1 iff the color is used in any ball position
-        for c in color_ids:
-            constraint = y[c] <= pulp.lpSum(x[b][c] for b in ball_ids), ""
-            prob += constraint
-            constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 10000000*y[c], ""
-            prob += constraint
+        # for c in color_ids:
+        #     constraint = y[c] <= pulp.lpSum(x[b][c] for b in ball_ids), ""
+        #     prob += constraint
+        #     constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 10000000*y[c], ""
+        #     prob += constraint
 
         # 3. if duplicates are allowed, we can add a constraint that the number of colors used
         # must be less or equal to the number of colors in the solution.
         # if duplicates are not allowed, the number of colors used must be equal to the number of colors in the solution.
         if self.mastermind.allow_duplicates:
-            constraint = pulp.lpSum(y[c] for c in color_ids) <= self.mastermind.code_length, ""
-            prob += constraint
+            # constraint = pulp.lpSum(y[c] for c in color_ids) <= self.mastermind.code_length, ""
+            # prob += constraint
+            pass
         else:
-            constraint = pulp.lpSum(y[c] for c in color_ids) == self.mastermind.code_length, ""
-            prob += constraint
+            # constraint = pulp.lpSum(y[c] for c in color_ids) == self.mastermind.code_length, ""
+            # prob += constraint
 
             # a color can only be chosen once
-            #for c in color_ids:
-            #    constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 1, ""
-            #    prob += constraint
+            for c in color_ids:
+               constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 1, ""
+               prob += constraint
 
         while any(h != PegColors.RED for h in hint):
             iterations += 1
@@ -90,7 +91,10 @@ class MastermindSolver:
             # color non represents the number of colors that are not in the solution
             # to make this ready for duplicates, us c in set(guess) and rhs = min(unique colors in guess, num none in hint)
             if hint.count(PegColors.NONE) > 0:
-                constraint = pulp.lpSum(1 - y[c] for c in guess) == hint.count(PegColors.NONE), ""
+                # constraint = pulp.lpSum(1 - y[c] for c in guess) == hint.count(PegColors.NONE), ""
+                #one of
+                constraint = pulp.lpSum(1 - x[b][c] for b in ball_ids for c in guess) == 4 * hint.count(PegColors.NONE), "na"
+
                 prob += constraint
 
 

@@ -63,9 +63,10 @@ def test_solver_no_balls_in_guess(mastermind):
 
 def test_solver(mastermind):
 
+    random.seed(42)
     solver = MastermindSolver(mastermind)
 
-    solution, num_iterations = solver.solve()
+    solution, num_iterations = solver.solve(write_lp_file=True)
     assert mastermind.check_solution(solution)
     assert num_iterations <= 5
 
