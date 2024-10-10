@@ -37,11 +37,6 @@ class MastermindSolver:
         x = pulp.LpVariable.dicts(name = "x",
                               indices = (ball_ids, color_ids),
                               cat = "Binary")
-        
-        # the variable y[c] is 1 iff color c exists in the solution
-        # y = pulp.LpVariable.dicts(name = "y",
-        #                         indices = color_ids,
-        #                         cat = "Binary")
 
         # for some reason we need to set this to something. not sure why?
         prob += x[0][Colors.RED], "Objective_Function" 
@@ -52,33 +47,18 @@ class MastermindSolver:
             constraint = pulp.lpSum(x[b][c] for c in color_ids) == 1, ""
             prob += constraint
 
-        # 2. force binary y[c] to be 1 iff the color is used in any ball position
-        # for c in color_ids:
-        #     constraint = y[c] <= pulp.lpSum(x[b][c] for b in ball_ids), ""
-        #     prob += constraint
-        #     constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 10000000*y[c], ""
-        #     prob += constraint
-
-        # 3. if duplicates are allowed, we can add a constraint that the number of colors used
-        # must be less or equal to the number of colors in the solution.
-        # if duplicates are not allowed, the number of colors used must be equal to the number of colors in the solution.
-        if self.mastermind.allow_duplicates:
-            # constraint = pulp.lpSum(y[c] for c in color_ids) <= self.mastermind.code_length, ""
-            # prob += constraint
-            pass
-        else:
-            # constraint = pulp.lpSum(y[c] for c in color_ids) == self.mastermind.code_length, ""
-            # prob += constraint
-
+        # 2. if duplicates are not allowed, we can add a constraint that says that each color can only be used once
+        if not self.mastermind.allow_duplicates:
             # a color can only be chosen once
             for c in color_ids:
                constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 1, ""
                prob += constraint
 
+
         while any(h != PegColors.RED for h in hint):
             iterations += 1
 
-            if iterations > 11:
+            if iterations > 10:
                 raise Exception(f"Too many iterations. solution: {self.mastermind.solution}")
 
 
@@ -89,7 +69,6 @@ class MastermindSolver:
 
             # color none represents the number of colors that are not in the solution
             if hint.count(PegColors.NONE) > 0:
-
                 constraint = pulp.lpSum(1 - x[b][c] for b in ball_ids for c in guess) >= 4 * hint.count(PegColors.NONE), ""
                 prob += constraint
 
