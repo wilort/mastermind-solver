@@ -1,5 +1,5 @@
 # mastermind-solver
-<img src=images/mastermind.jpg alt="My Example Image" width="300" height="200" class=center>
+<img src=images/mastermind.png alt="My Example Image" width="250" height="200" class=center>
 
 The purpose of this project is to showcase an algorithm that solves the mastermind board game
 with linear programming.
