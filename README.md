@@ -33,7 +33,8 @@ $$x_{b,c} =
 0 & \text{otherwise}.
 \end{cases}$$
 
-Let $ y_c $ be a binary variable where:
+Let $y_c$ be a binary variable where:
+
 $$y_c =
 \begin{cases}
 1 & \text{if color } c \text{ exists in the solution}, \\
