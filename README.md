@@ -27,8 +27,6 @@ $C$ be the set of possible ball colors.
 
 Let $x_{b,c}$ be a binary variable where $b \in B, c \in C$.
 
-$$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$
-
 $$x_{b,c} =
 \begin{cases}
 1 & \text{if ball } b \text{ has color } c, \\
@@ -36,55 +34,39 @@ $$x_{b,c} =
 \end{cases}$$
 
 Let $ y_c $ be a binary variable where:
-$$
-y_c =
+$$y_c =
 \begin{cases}
 1 & \text{if color } c \text{ exists in the solution}, \\
 0 & \text{otherwise}.
-\end{cases}
-$$
+\end{cases}$$
 
 Each ball position has exactly one color.
 Hence, the following constraint is required.
-$$
-\sum_{c \in C} x_{bc} = 1, \text{for all } b \in B
-$$
+
+$$\sum_{c \in C} x_{bc} = 1, \text{for all } b \in B$$
 
 There can be a maximum of four ball colors in a guess.
 Hence, the following constraint is required.
-$$
-\sum_{b \in B} \sum_{c \in C} x_{bc} \leq 4
-$$
+$$\sum_{b \in B} \sum_{c \in C} x_{bc} \leq 4$$
 
 The variables x and y are related.
 To force binary $y_c$ to be $1$ if and only if the color is used in any ball position
 Hence, the following constraints are required.
-$$
-y_c \leq \sum_{b \in B} x_{bc}, \text{for all } c \in C
-$$
-$$
-\sum_{b \in B} x_{bc} \leq 10000y_c, \text{for all } c \in C
-$$
-
+$$y_c \leq \sum_{b \in B} x_{bc}, \text{for all } c \in C$$
+$$\sum_{b \in B} x_{bc} \leq 10000y_c, \text{for all } c \in C$$
 
 ## Constraints from guess and key pegs
 
 Let $G$ be the guess.
 
 Let $r$ be the number of red colored key pegs.
-$$
-\sum_{b,c \in G} x_{bc} = r
-$$
+$$\sum_{b,c \in G} x_{bc} = r$$
 
 Let $n$ be the number of none key pegs.
-$$
-\sum_{c \in G} 1 - y_c = n
-$$
+$$\sum_{c \in G} 1 - y_c = n$$
 
 Let $w$ be the number of white colored key pegs.
-$$
-\sum_{b,c \in G} 1 - x_{bc} \geq w
-$$
+$$\sum_{b,c \in G} 1 - x_{bc} \geq w$$
 
 
 # TODO:
