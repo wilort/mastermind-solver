@@ -47,12 +47,15 @@ $$\sum_{c \in C} x_{bc} = 1, \text{for all } b \in B$$
 
 There can be a maximum of four ball colors in a guess.
 Hence, the following constraint is required.
+
 $$\sum_{b \in B} \sum_{c \in C} x_{bc} \leq 4$$
 
 The variables x and y are related.
 To force binary $y_c$ to be $1$ if and only if the color is used in any ball position
 Hence, the following constraints are required.
+
 $$y_c \leq \sum_{b \in B} x_{bc}, \text{for all } c \in C$$
+
 $$\sum_{b \in B} x_{bc} \leq 10000y_c, \text{for all } c \in C$$
 
 ## Constraints from guess and key pegs
@@ -60,12 +63,15 @@ $$\sum_{b \in B} x_{bc} \leq 10000y_c, \text{for all } c \in C$$
 Let $G$ be the guess.
 
 Let $r$ be the number of red colored key pegs.
+
 $$\sum_{b,c \in G} x_{bc} = r$$
 
 Let $n$ be the number of none key pegs.
+
 $$\sum_{c \in G} 1 - y_c = n$$
 
 Let $w$ be the number of white colored key pegs.
+
 $$\sum_{b,c \in G} 1 - x_{bc} \geq w$$
 
 
