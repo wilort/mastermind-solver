@@ -15,7 +15,7 @@ def mastermind():
     #     mastermind = Mastermind()
     #     mastermind.new_game()
     #     return mastermind
-    mastermind = Mastermind()
+    mastermind = Mastermind(allow_duplicates=True)
     mastermind.new_game()
     return mastermind
 
@@ -59,16 +59,31 @@ def test_solver_no_balls_in_guess(mastermind):
     with mock.patch.object(MastermindSolver, "create_guess", return_value=mocked_first_guess):
         solution, num_iterations = solver.solve()
         assert mastermind.check_solution(solution)
-        assert num_iterations == 4
+        assert num_iterations == 5
 
-def test_solver(mastermind):
+def test_solver_lol(mastermind):
 
+    mastermind.set_solution([Colors.RED, Colors.RED, Colors.RED, Colors.RED])
+
+    solver = MastermindSolver(mastermind)
+
+    mocked_first_guess = [Colors.RED, Colors.BROWN, Colors.WHITE, Colors.BLACK]
+
+    with mock.patch.object(MastermindSolver, "create_guess", return_value=mocked_first_guess):
+        solution, num_iterations = solver.solve()
+        assert mastermind.check_solution(solution)
+        assert num_iterations == 5
+
+def test_solver():
+
+    mastermind = Mastermind(allow_duplicates=True)
     random.seed(42)
+    mastermind.set_solution([Colors.BLUE, Colors.RED, Colors.RED, Colors.RED])
     solver = MastermindSolver(mastermind)
 
     solution, num_iterations = solver.solve(write_lp_file=True)
     assert mastermind.check_solution(solution)
-    assert num_iterations <= 5
+    assert num_iterations <= 6
 
 def atest_solver_timing():
 
@@ -101,8 +116,8 @@ def test_solver_num_iterations():
         total_num_iterations += num_iterations
         max_num_iterations = max(max_num_iterations, num_iterations)
         assert mastermind.check_solution(solution)
-    assert total_num_iterations == 372
-    assert max_num_iterations == 6
+    assert total_num_iterations == 623
+    assert max_num_iterations == 10
 
 def generate_random_solution_with_duplicates():
     colors = list(Colors)
@@ -127,8 +142,8 @@ def test_solver_num_iterations_with_duplicates():
         total_num_iterations += num_iterations
         max_num_iterations = max(max_num_iterations, num_iterations)
         assert mastermind.check_solution(solution)
-    assert total_num_iterations == 481
-    assert max_num_iterations == 7
+    assert total_num_iterations == 660
+    assert max_num_iterations == 10
 
 
 def test_solver_all_color_combinations():

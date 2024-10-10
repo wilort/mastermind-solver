@@ -39,9 +39,9 @@ class MastermindSolver:
                               cat = "Binary")
         
         # the variable y[c] is 1 iff color c exists in the solution
-        y = pulp.LpVariable.dicts(name = "y",
-                                indices = color_ids,
-                                cat = "Binary")
+        # y = pulp.LpVariable.dicts(name = "y",
+        #                         indices = color_ids,
+        #                         cat = "Binary")
 
         # for some reason we need to set this to something. not sure why?
         prob += x[0][Colors.RED], "Objective_Function" 
@@ -87,29 +87,18 @@ class MastermindSolver:
                 constraint = pulp.lpSum(x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.RED) , ""
                 prob += constraint
 
-
-            # color non represents the number of colors that are not in the solution
-            # to make this ready for duplicates, us c in set(guess) and rhs = min(unique colors in guess, num none in hint)
+            # color none represents the number of colors that are not in the solution
             if hint.count(PegColors.NONE) > 0:
-                # constraint = pulp.lpSum(1 - y[c] for c in guess) == hint.count(PegColors.NONE), ""
-                #one of
-                constraint = pulp.lpSum(1 - x[b][c] for b in ball_ids for c in guess) == 4 * hint.count(PegColors.NONE), "na"
 
+                constraint = pulp.lpSum(1 - x[b][c] for b in ball_ids for c in guess) >= 4 * hint.count(PegColors.NONE), ""
                 prob += constraint
 
 
             # color white represents the number of correct ball colors but in the wrong position
-            # I suspect this constraint is not giving as much information
-            # as it could do.
-            # perhaps sum over white and none?
-            # and then make it equal to the number of white and none in the hint?
-            # if hint.count(PegColors.WHITE) > 0:
-            #     constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) >= hint.count(PegColors.WHITE) , ""
-            #     prob += constraint
-
             if hint.count(PegColors.WHITE) + hint.count(PegColors.NONE) > 0:
                 constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.WHITE) + hint.count(PegColors.NONE) , ""
                 prob += constraint
+
 
             if write_lp_file:
                 prob.writeLP(f"tmp/model_{iterations}.lp")
