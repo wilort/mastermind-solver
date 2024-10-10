@@ -25,15 +25,15 @@ Let
 $B$ be the set of ball IDs and
 $C$ be the set of possible ball colors.
 
-Let $x_{b,c}$ be a binary variable where $ b \in B, c \in C $.
+Let $x_{b,c}$ be a binary variable where $b \in B, c \in C$.
+
 $$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$
-$$
-x_{b,c} =
+
+$$x_{b,c} =
 \begin{cases}
 1 & \text{if ball } b \text{ has color } c, \\
 0 & \text{otherwise}.
-\end{cases}
-$$
+\end{cases}$$
 
 Let $ y_c $ be a binary variable where:
 $$
