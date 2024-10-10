@@ -1,4 +1,4 @@
-# mastermind-solver
+# Mastermind-solver
 <img src=images/mastermind.png alt="My Example Image" width="250" height="200" class=center>
 
 The purpose of this project is to showcase an algorithm that solves the mastermind board game
@@ -12,7 +12,7 @@ The game can be solved by setting up a linear optimization model with binary var
 
 1. Make a randomized guess at the solution and get a set of key pegs.
 2. Set up the optimization model.
-3. If all key pegs are red go to step 8, else go to step 3
+3. If all key pegs are red go to step 7, else go to step 4
 4. Convert the guess and key pegs into constraints and append them to the model.
 5. Solve the optimization model. The solution represents a new guess.
 6. Generate a new set of key pegs and go to step 2.
@@ -26,6 +26,7 @@ $B$ be the set of ball IDs and
 $C$ be the set of possible ball colors.
 
 Let $ x_{b,c} $ be a binary variable where $ b \in B, c \in C $.
+$$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$
 $$
 x_{b,c} =
 \begin{cases}
