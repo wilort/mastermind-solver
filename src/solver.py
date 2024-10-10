@@ -56,7 +56,7 @@ class MastermindSolver:
         for c in color_ids:
             constraint = y[c] <= pulp.lpSum(x[b][c] for b in ball_ids), ""
             prob += constraint
-            constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 100000*y[c], ""
+            constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 10000000*y[c], ""
             prob += constraint
 
         # 3. if duplicates are allowed, we can add a constraint that the number of colors used
@@ -97,8 +97,14 @@ class MastermindSolver:
             # color white represents the number of correct ball colors but in the wrong position
             # I suspect this constraint is not giving as much information
             # as it could do.
-            if hint.count(PegColors.WHITE) > 0:
-                constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) >= hint.count(PegColors.WHITE) , ""
+            # perhaps sum over white and none?
+            # and then make it equal to the number of white and none in the hint?
+            # if hint.count(PegColors.WHITE) > 0:
+            #     constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) >= hint.count(PegColors.WHITE) , ""
+            #     prob += constraint
+
+            if hint.count(PegColors.WHITE) + hint.count(PegColors.NONE) > 0:
+                constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.WHITE) + hint.count(PegColors.NONE) , ""
                 prob += constraint
 
             if write_lp_file:

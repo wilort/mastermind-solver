@@ -100,8 +100,8 @@ def test_solver_num_iterations():
         total_num_iterations += num_iterations
         max_num_iterations = max(max_num_iterations, num_iterations)
         assert mastermind.check_solution(solution)
-    assert total_num_iterations == 477
-    assert max_num_iterations == 9
+    assert total_num_iterations == 372
+    assert max_num_iterations == 6
 
 def generate_random_solution_with_duplicates():
     colors = list(Colors)
@@ -126,11 +126,11 @@ def test_solver_num_iterations_with_duplicates():
         total_num_iterations += num_iterations
         max_num_iterations = max(max_num_iterations, num_iterations)
         assert mastermind.check_solution(solution)
-    assert total_num_iterations == 519
-    assert max_num_iterations == 9
+    assert total_num_iterations == 481
+    assert max_num_iterations == 7
 
 
-def atest_solver_all_color_combinations():
+def test_solver_all_color_combinations():
 
     random.seed(42)
 
@@ -147,5 +147,5 @@ def atest_solver_all_color_combinations():
         assert mastermind.check_solution(solution)
         total_num_iterations += num_iterations
         max_num_iterations = max(max_num_iterations, num_iterations)
-    assert total_num_iterations == 22199
+    assert total_num_iterations == 20318
     assert max_num_iterations == 11
