@@ -23,7 +23,7 @@ The game can be solved by setting up a linear optimization model with binary var
 ## General optimization model.
 Let 
 $B$ be the set of ball IDs and
-$C$ be the set of possible ball colors
+$C$ be the set of possible ball colors.
 
 Let $ x_{b,c} $ be a binary variable where $ b \in B, c \in C $.
 $$
@@ -109,10 +109,10 @@ white, none, none, red
 constraints:
 white: 1-x0g + 1-x1g + 1-x2g + 1-x3g <= num white
 
-
-# this constraint will count the make sure that 
-# colors not in the solution are removed from the guess
-# and it will also remove the need of the variable y
-# constraint = pulp.lpSum(1 - x[b][c] for b in ball_ids for c in guess) == len(ball_ids) * hint.count(PegColors.NONE), ""
+#notes
+this constraint will count the make sure that 
+colors not in the solution are removed from the guess
+and it will also remove the need of the variable y
+constraint = pulp.lpSum(1 - x[b][c] for b in ball_ids for c in guess) == len(ball_ids) * hint.count(PegColors.NONE), ""
 
 
