@@ -69,43 +69,27 @@ class MastermindSolver:
             constraint = pulp.lpSum(y[c] for c in color_ids) == self.mastermind.code_length, ""
             prob += constraint
 
-            # a color can only be chosen once
-            #for c in color_ids:
+            #a color can only be chosen once
+            # for c in color_ids:
             #    constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 1, ""
             #    prob += constraint
+            pass
 
         while any(h != PegColors.RED for h in hint):
             iterations += 1
 
-            if iterations > 11:
+            if iterations > 10:
                 raise Exception(f"Too many iterations. solution: {self.mastermind.solution}")
 
-
             # color red represents the number of correct ball colors in the correct position
-            if hint.count(PegColors.RED) > 0:
-                constraint = pulp.lpSum(x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.RED) , ""
-                prob += constraint
+            constraint = pulp.lpSum(x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.RED) , ""
+            prob += constraint
 
+            # color white represents the number of correct ball colors in the wrong position
+            constraint = pulp.lpSum(y[c] for c in guess) == hint.count(PegColors.WHITE) + hint.count(PegColors.RED) , ""
+            #constraint = pulp.lpSum(x[b][c] for b in ball_ids for c in guess if (b,c) not in enumerate(guess)) == hint.count(PegColors.WHITE), ""
 
-            # color non represents the number of colors that are not in the solution
-            # to make this ready for duplicates, us c in set(guess) and rhs = min(unique colors in guess, num none in hint)
-            if hint.count(PegColors.NONE) > 0:
-                constraint = pulp.lpSum(1 - y[c] for c in guess) == hint.count(PegColors.NONE), ""
-                prob += constraint
-
-
-            # color white represents the number of correct ball colors but in the wrong position
-            # I suspect this constraint is not giving as much information
-            # as it could do.
-            # perhaps sum over white and none?
-            # and then make it equal to the number of white and none in the hint?
-            # if hint.count(PegColors.WHITE) > 0:
-            #     constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) >= hint.count(PegColors.WHITE) , ""
-            #     prob += constraint
-
-            if hint.count(PegColors.WHITE) + hint.count(PegColors.NONE) > 0:
-                constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.WHITE) + hint.count(PegColors.NONE) , ""
-                prob += constraint
+            prob += constraint
 
             if write_lp_file:
                 prob.writeLP(f"tmp/model_{iterations}.lp")
