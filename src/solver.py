@@ -115,3 +115,84 @@ class MastermindSolver:
             hint = self.mastermind.get_hint(guess)
         
         return guess, iterations
+
+
+    def solve2(self, quiet=True, write_lp_file=False) -> Tuple[List[Colors], int]:
+
+        iterations = 0
+
+        guess = self.create_guess()
+
+        hint = self.mastermind.get_hint(guess)
+
+        if all(c == PegColors.RED for c in hint):
+            return guess, iterations
+
+        ball_ids = range(self.mastermind.code_length)
+        color_ids = list(Colors)
+
+        prob = pulp.LpProblem("mastermind_problem", pulp.LpMinimize)
+
+        # the variable x[b][c] is 1 iff ball b has color c
+        x = pulp.LpVariable.dicts(name = "x",
+                              indices = (ball_ids, color_ids),
+                              cat = "Binary")
+
+        # for some reason we need to set this to something. not sure why?
+        prob += x[0][Colors.RED], "Objective_Function" 
+
+        # create some general constraints:
+        # 1. each ball position has exactly one color
+        for b in ball_ids:
+            constraint = pulp.lpSum(x[b][c] for c in color_ids) == 1, ""
+            prob += constraint
+
+        # 2. if duplicates are not allowed, a color can only be chosen once
+        if not self.mastermind.allow_duplicates:
+
+            for c in color_ids:
+               constraint = pulp.lpSum(x[b][c] for b in ball_ids) <= 1, ""
+               prob += constraint
+
+        while any(h != PegColors.RED for h in hint):
+            iterations += 1
+
+            if iterations > 10:
+                raise Exception(f"Too many iterations. solution: {self.mastermind.solution}")
+
+            # color red represents the number of correct ball colors in the correct position
+            constraint = pulp.lpSum(x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.RED) , ""
+            prob += constraint
+
+            # color white represents the number of correct ball colors in the wrong position
+            constraint = pulp.lpSum(x[b][c] for b in ball_ids for c in guess) == hint.count(PegColors.WHITE) + hint.count(PegColors.RED), ""
+            #constraint = pulp.lpSum(x[b][c] for b in ball_ids for c in guess if (b,c) not in enumerate(guess)) == hint.count(PegColors.WHITE), ""
+            prob += constraint
+
+            # color none represents the number of colors that are not in the solution
+            #constraint = pulp.lpSum(1 - x[b][c] for b in ball_ids for c in guess) == hint.count(PegColors.NONE), ""
+
+            if write_lp_file:
+                prob.writeLP(f"tmp/model_{iterations}.lp")
+
+            # solve the problem
+            if quiet:
+                prob.solve(solver=pulp.PULP_CBC_CMD(timeLimit=60, msg=False))
+            else:
+                prob.solve()
+
+            status = pulp.LpStatus[prob.status]
+
+            if status != "Optimal":
+                raise Exception(f"No optimal solution found. Status: {status}, iterations: {iterations}, guess: {guess}, hint: {hint}")
+
+            new_guess = self.mastermind.code_length*[None]
+            for b in ball_ids:
+                for c in color_ids:
+                    if x[b][c].varValue == 1:
+                        new_guess[b] = c
+
+            guess = new_guess
+            hint = self.mastermind.get_hint(guess)
+        
+        return guess, iterations
