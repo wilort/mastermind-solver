@@ -10,10 +10,10 @@ class Colors(Enum):
     BLUE: str = "BLUE"
     GREEN: str = "GREEN"
     YELLOW: str = "YELLOW"
-    ORANGE: str = "ORANGE"
-    BROWN: str = "BROWN"
     WHITE: str = "WHITE"
     BLACK: str = "BLACK"
+    #ORANGE: str = "ORANGE"
+    #BROWN: str = "BROWN"
 
 class PegColors(Enum):
     RED: str = "RED" # correct color, correct position

@@ -34,7 +34,7 @@ def test_set_solution_with_duplicates_error():
 @pytest.mark.parametrize("guess, expected_hint", [
     ([C.RED, C.BLUE, C.GREEN, C.YELLOW], [PC.RED, PC.RED, PC.RED, PC.RED]),
     ([C.BLUE, C.RED, C.YELLOW, C.GREEN], [PC.WHITE, PC.WHITE, PC.WHITE, PC.WHITE]),
-    ([C.ORANGE, C.BROWN, C.WHITE, C.BLACK], [PC.NONE, PC.NONE, PC.NONE, PC.NONE]),
+    ([C.WHITE, C.BLACK, C.WHITE, C.BLACK], [PC.NONE, PC.NONE, PC.NONE, PC.NONE]),
     ([C.RED, C.GREEN, C.BLUE, C.BLACK], [PC.RED, PC.WHITE, PC.WHITE, PC.NONE]),
     ([C.RED, C.RED, C.RED, C.RED], [PC.RED, PC.WHITE, PC.WHITE, PC.WHITE]),
     ([C.BLUE, C.RED, C.YELLOW, C.BLACK], [PC.WHITE, PC.WHITE, PC.WHITE, PC.NONE]),
