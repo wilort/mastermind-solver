@@ -13,6 +13,62 @@ x_50, x51, x52, x53
 x_60, x61, x62, x63
 x_70, x71, x72, x73
 
+
+
+
+solution: red, red, blue, blue
+guess is red,red,red,blue
+hint is white, red, red, red
+than one of the other colors must be in the solution
+in this scenario we cannot say that another color is used.
+
+however we can say that
+y_c <= set(guess) = 2
+
+
+
+what happens when 
+solution is red,blue,green,yellow
+guess is, red,red,green, yellow
+does this give the  hint
+white, red, red, red.
+if we have this scenario,
+then one of the colors in the guess is a duplicate and hence
+it is one of the colors NOT in the guess that needs to be tried
+this should imply the following constraint
+y_blue + y_black + y_white = 1
+
+we cannot say y_c < set(guess)=3
+
+
+
+
+
+
+inspired by this 
+
+Solution: [<Colors.BLACK: 'BLACK'>, <Colors.RED: 'RED'>, <Colors.GREEN: 'GREEN'>, <Colors.RED: 'RED'>]
+[<Colors.RED: 'RED'>, <Colors.BLUE: 'BLUE'>, <Colors.GREEN: 'GREEN'>, <Colors.YELLOW: 'YELLOW'>]
+[<PegColors.WHITE: 'WHITE'>, <PegColors.NONE: 'NONE'>, <PegColors.NONE: 'NONE'>, <PegColors.RED: 'RED'>]
+[<Colors.WHITE: 'WHITE'>, <Colors.BLUE: 'BLUE'>, <Colors.RED: 'RED'>, <Colors.BLACK: 'BLACK'>]
+[<PegColors.NONE: 'NONE'>, <PegColors.NONE: 'NONE'>, <PegColors.WHITE: 'WHITE'>, <PegColors.WHITE: 'WHITE'>]
+[<Colors.BLUE: 'BLUE'>, <Colors.WHITE: 'WHITE'>, <Colors.GREEN: 'GREEN'>, <Colors.GREEN: 'GREEN'>]
+[<PegColors.NONE: 'NONE'>, <PegColors.NONE: 'NONE'>, <PegColors.WHITE: 'WHITE'>, <PegColors.RED: 'RED'>]
+[<Colors.YELLOW: 'YELLOW'>, <Colors.WHITE: 'WHITE'>, <Colors.BLUE: 'BLUE'>, <Colors.YELLOW: 'YELLOW'>]
+[<PegColors.NONE: 'NONE'>, <PegColors.NONE: 'NONE'>, <PegColors.NONE: 'NONE'>, <PegColors.NONE: 'NONE'>]
+[<Colors.BLACK: 'BLACK'>, <Colors.BLACK: 'BLACK'>, <Colors.GREEN: 'GREEN'>, <Colors.RED: 'RED'>]
+[<PegColors.WHITE: 'WHITE'>, <PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>]
+[<Colors.GREEN: 'GREEN'>, <Colors.BLACK: 'BLACK'>, <Colors.GREEN: 'GREEN'>, <Colors.RED: 'RED'>]
+[<PegColors.RED: 'RED'>, <PegColors.WHITE: 'WHITE'>, <PegColors.RED: 'RED'>, <PegColors.WHITE: 'WHITE'>]
+[<Colors.BLACK: 'BLACK'>, <Colors.GREEN: 'GREEN'>, <Colors.GREEN: 'GREEN'>, <Colors.RED: 'RED'>]
+[<PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>, <PegColors.WHITE: 'WHITE'>]
+[<Colors.BLACK: 'BLACK'>, <Colors.RED: 'RED'>, <Colors.GREEN: 'GREEN'>, <Colors.RED: 'RED'>]
+[<PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>]
+
+
+
+
+
 solution is (1,2,3,4)
 guess is (5,2,7,1)
 then key pegs:

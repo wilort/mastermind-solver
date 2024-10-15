@@ -25,6 +25,8 @@ class MastermindSolver:
 
         guess = self.create_guess()
 
+        guesses = [guess]
+
         hint = self.mastermind.get_hint(guess)
 
         if all(c == PegColors.RED for c in hint):
@@ -46,8 +48,7 @@ class MastermindSolver:
                                 cat = "Binary")
 
         # for some reason we need to set this to something. not sure why?
-        #prob += x[0][Colors.RED], "Objective_Function"
-        prob += pulp.lpSum(x[b][c] for b in ball_ids for c in color_ids), "Objective_Function"
+        prob += x[0][Colors.RED], "Objective_Function"
 
         # create some general constraints:
         # 1. each ball position has exactly one color
@@ -96,12 +97,19 @@ class MastermindSolver:
 
             # The following constraints are not necessary and mathematically equivalent to the above constraints.
             # However, they help the solver to find the solution in less iterations.
-            
             constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.NONE) + hint.count(PegColors.WHITE), ""
             prob += constraint
 
             constraint = pulp.lpSum(1 - y[c] for c in guess) == hint.count(PegColors.NONE) , ""
             prob += constraint
+
+
+
+            # other heuristics
+            # if hint.count(PegColors.RED) == 3 and hint.count(PegColors.WHITE) == 1:
+            #     constraint = pulp.lpSum(y[c] for c in color_ids if c not in guess) == 1, ""
+            #     prob += constraint
+
 
             if write_lp_file:
                 prob.writeLP(f"tmp/model_{iterations}.lp")
@@ -124,6 +132,15 @@ class MastermindSolver:
                         new_guess[b] = c
 
             guess = new_guess
+            guesses.append(guess)
             hint = self.mastermind.get_hint(guess)
-        
+
+        if iterations >= 8:
+            # write guesses to file
+            with open("tmp/guesses.txt", "w") as f:
+                f.write(f"Solution: {self.mastermind.solution}\n")
+                for g in guesses:
+                    f.write(f"guess: {g}\n")
+                    f.write(f"hint: {self.mastermind.get_hint(g)}\n")
+
         return guess, iterations
