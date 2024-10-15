@@ -21,7 +21,7 @@ class MastermindSolver:
 
     def solve(self, quiet=True, write_lp_file=False) -> Tuple[List[Colors], int]:
 
-        iterations = 0
+        iterations = 1
 
         guess = self.create_guess()
 
@@ -46,7 +46,8 @@ class MastermindSolver:
                                 cat = "Binary")
 
         # for some reason we need to set this to something. not sure why?
-        prob += x[0][Colors.RED], "Objective_Function"
+        #prob += x[0][Colors.RED], "Objective_Function"
+        prob += pulp.lpSum(x[b][c] for b in ball_ids for c in color_ids), "Objective_Function"
 
         # create some general constraints:
         # 1. each ball position has exactly one color
@@ -84,6 +85,22 @@ class MastermindSolver:
 
             # color white represents the number of correct ball colors in the wrong position
             constraint = pulp.lpSum(y[c] for c in guess) == hint.count(PegColors.WHITE) + hint.count(PegColors.RED) , ""
+            prob += constraint
+
+            # this constraint says that if the hint has a white peg then one of the colors
+            # is in the wrong position and hence one of the other ball ids and positions must be larger than the white peg count
+            constraint = pulp.lpSum(x[b][c] for b in ball_ids for c in guess if b not in enumerate(guess)) >= hint.count(PegColors.WHITE), ""
+            prob += constraint
+
+
+
+            # The following constraints are not necessary and mathematically equivalent to the above constraints.
+            # However, they help the solver to find the solution in less iterations.
+            
+            constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.NONE) + hint.count(PegColors.WHITE), ""
+            prob += constraint
+
+            constraint = pulp.lpSum(1 - y[c] for c in guess) == hint.count(PegColors.NONE) , ""
             prob += constraint
 
             if write_lp_file:

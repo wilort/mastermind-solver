@@ -2,21 +2,27 @@
 <img src=images/mastermind.png alt="My Example Image" width="250" height="200" class=center>
 
 The purpose of this project is to showcase an algorithm that solves the mastermind board game
-with linear programming.
+with linear optimization model with binary variables.
 
 # Game description
 https://en.wikipedia.org/wiki/Mastermind_(board_game)
 
 # Algorithm description
-The game can be solved by setting up a linear optimization model with binary variables.
+The game can be solved with the following algorithm.
 
 1. Make a randomized guess at the solution and get a set of key pegs.
+
 2. Set up the optimization model.
-3. If all key pegs are red go to step 7, else go to step 4
-4. Convert the guess and key pegs into constraints and append them to the model.
-5. Solve the optimization model. The solution represents a new guess.
-6. Generate a new set of key pegs and go to step 2.
-7. solution found!
+
+3. If all key pegs are red go to step 4, else go to step 3.1
+
+    3.1 Convert the guess and key pegs into constraints and append them to the model.
+
+    3.2 Solve the optimization model. The solution represents the next guess.
+
+    3.3 Generate a new set of key pegs and go to step 3.
+
+4. solution found!
 
 # Linear optimization model
 
@@ -58,6 +64,8 @@ The numbers of colors that can be chosen is limited by
 the number of ball ids $|B|$
 
 $$\sum_{c \in C} y_c \leq |B|$$
+
+If duplicates are not permitted the above constraint is used with an equality instead.
 
 
 ## Constraints from guess and key pegs

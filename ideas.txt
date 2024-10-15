@@ -28,6 +28,13 @@ and it will also remove the need of the variable y
 constraint = pulp.lpSum(1 - x[b][c] for b in ball_ids for c in guess) == len(ball_ids) * hint.count(PegColors.NONE), ""
 
 
+solution is blue,blue,blue,blue
+if guess 1 is
+green,green,blue,blue then hint is none, red, none, red
+if guess 2 is
+blue,yellow,blue,blue then hint is none, red, red, red
+
+index 0,1 switched color
 
 this solver solves it without y. but cant manage duplicates
 
