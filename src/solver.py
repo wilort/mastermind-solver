@@ -69,10 +69,16 @@ class MastermindSolver:
         if self.mastermind.allow_duplicates:
             constraint = pulp.lpSum(y[c] for c in color_ids) <= self.mastermind.code_length, ""
             prob += constraint
+
         else:
             constraint = pulp.lpSum(y[c] for c in color_ids) == self.mastermind.code_length, ""
             prob += constraint
-
+        
+        # 4. exactly 4 positions and colors are chosen
+        # this increases the avg number of iterations to find the solution
+        # but decreases the max number of iterations
+        # constraint = pulp.lpSum(x[b][c] for b in ball_ids for c in color_ids) == self.mastermind.code_length, ""
+        # prob += constraint
 
         while any(h != PegColors.RED for h in hint):
             iterations += 1
@@ -90,19 +96,30 @@ class MastermindSolver:
 
             # this constraint says that if the hint has a white peg then one of the colors
             # is in the wrong position and hence one of the other ball ids and positions must be larger than the white peg count
-            constraint = pulp.lpSum(x[b][c] for b in ball_ids for c in guess if b not in enumerate(guess)) >= hint.count(PegColors.WHITE), ""
+
+            # this constraint is not equals due to the following scenario.
+            # assume solutione is R,G,B,Y and guess is R,G,B,R then hint is R,R,R,W
+            # if it was equals this constraint would say that
+            #             x[1][R] + x[2][R] + x[3][R]
+            # + x[0][G]           + x[2][G] + x[3][G]
+            # + x[0][B] + x[1][B]           + x[3][B]
+            # + x[0][Y] + x[1][Y] + x[2][Y]           == 1
+            # forcing x[1][R] + x[2][R] + x[3][R]
+            constraint = pulp.lpSum(x[b][c] for i,c in enumerate(guess) for b in ball_ids if i != b) >= hint.count(PegColors.WHITE), f""
             prob += constraint
 
 
 
             # The following constraints are not necessary and mathematically equivalent to the above constraints.
-            # However, they help the solver to find the solution in less iterations.
+            # However, they help the solver to find the solution in less iterations for some reason.
             constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.NONE) + hint.count(PegColors.WHITE), ""
             prob += constraint
 
             constraint = pulp.lpSum(1 - y[c] for c in guess) == hint.count(PegColors.NONE) , ""
             prob += constraint
 
+            #constraint = pulp.lpSum(1 - x[b][c] for i,c in enumerate(guess) for b in ball_ids if i != b) >= 12 - hint.count(PegColors.NONE) - hint.count(PegColors.WHITE), f"lol2_{iterations}"
+            #prob += constraint
 
 
             # other heuristics
