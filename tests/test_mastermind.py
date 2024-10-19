@@ -36,7 +36,7 @@ def test_set_solution_with_duplicates_error():
     ([C.BLUE, C.RED, C.YELLOW, C.GREEN], [PC.WHITE, PC.WHITE, PC.WHITE, PC.WHITE]),
     ([C.WHITE, C.BLACK, C.WHITE, C.BLACK], [PC.NONE, PC.NONE, PC.NONE, PC.NONE]),
     ([C.RED, C.GREEN, C.BLUE, C.BLACK], [PC.RED, PC.WHITE, PC.WHITE, PC.NONE]),
-    ([C.RED, C.RED, C.RED, C.RED], [PC.RED, PC.WHITE, PC.WHITE, PC.WHITE]),
+    ([C.RED, C.RED, C.RED, C.RED], [PC.RED, PC.NONE, PC.NONE, PC.NONE]),
     ([C.BLUE, C.RED, C.YELLOW, C.BLACK], [PC.WHITE, PC.WHITE, PC.WHITE, PC.NONE]),
 ])
 def test_get_hint(mastermind, guess, expected_hint):
@@ -49,3 +49,18 @@ def test_get_hint(mastermind, guess, expected_hint):
 
     for pc in list(PC):
         assert hint.count(pc) == expected_hint.count(pc)
+
+
+def test_get_hint_wikipedia_example():
+
+    mastermind = Mastermind(allow_duplicates=True)
+
+    solution = [C.RED, C.RED, C.BLUE, C.BLUE]
+    guess = [C.RED, C.RED, C.RED, C.BLUE]
+
+    mastermind.set_solution(solution)
+
+    hint = mastermind.get_hint(guess)
+
+    assert hint.count(PC.RED) == 3
+    assert hint.count(PC.NONE) == 1

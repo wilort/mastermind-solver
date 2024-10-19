@@ -49,7 +49,7 @@ class Mastermind():
     def check_solution(self, guess: List[Colors]) -> bool:
         return guess == self.solution
     
-    def get_hint(self, guess: List[Colors]) -> List[PegColors]:
+    def get_hint_old(self, guess: List[Colors]) -> List[PegColors]:
         hint = []
         for i, color in enumerate(guess):
             if color == self.solution[i]:
@@ -58,6 +58,28 @@ class Mastermind():
                 hint.append(PegColors.WHITE)
             else:
                 hint.append(PegColors.NONE)
+
+        random.shuffle(hint)
+        return hint
+
+    def get_hint(self, guess: List[Colors]) -> List[PegColors]:
+
+        hint = []
+        index_and_colors_in_correct_position = set()
+
+        for i, color in enumerate(guess):
+            if color == self.solution[i]:
+                hint.append(PegColors.RED)
+                index_and_colors_in_correct_position.add((i, color))
+
+        for i, color in enumerate(guess):
+            if (i, color) in index_and_colors_in_correct_position:
+                continue
+            elif color in self.solution and color not in [c for i, c in index_and_colors_in_correct_position]:
+                hint.append(PegColors.WHITE)
+            else:
+                hint.append(PegColors.NONE)
+
 
         random.shuffle(hint)
         return hint
