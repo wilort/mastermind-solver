@@ -98,14 +98,15 @@ class MastermindSolver:
             # is in the wrong position and hence one of the other ball ids and positions must be larger than the white peg count
 
             # this constraint is not equals due to the following scenario.
-            # assume solutione is R,G,B,Y and guess is R,G,B,R then hint is R,R,R,W
+            # assume solution is R,G,B,Y and guess is R,G,B,R then hint is R,R,R,W
             # if it was equals this constraint would say that
-            #             x[1][R] + x[2][R] + x[3][R]
-            # + x[0][G]           + x[2][G] + x[3][G]
-            # + x[0][B] + x[1][B]           + x[3][B]
-            # + x[0][Y] + x[1][Y] + x[2][Y]           == 1
+            #   x[0][R] + x[1][R] + x[2][R] + x[3][R]
+            # + x[0][G] + x[1][G] + x[2][G] + x[3][G]
+            # + x[0][B] + x[1][B] + x[2][B] + x[3][B]
+            # + x[0][R] + x[1][R] + x[2][R] + x[3][R] >= 1+3
             # forcing x[1][R] + x[2][R] + x[3][R]
-            constraint = pulp.lpSum(x[b][c] for i,c in enumerate(guess) for b in ball_ids if i != b) >= hint.count(PegColors.WHITE), f""
+            #constraint = pulp.lpSum(x[b][c] for i,c in enumerate(guess) for b in ball_ids if i != b) >= hint.count(PegColors.WHITE), f""
+            constraint = pulp.lpSum(x[b][c] for c in guess for b in ball_ids) >= hint.count(PegColors.WHITE) + hint.count(PegColors.RED), f""
             prob += constraint
 
 
