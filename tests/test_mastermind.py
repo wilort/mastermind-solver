@@ -1,17 +1,8 @@
 from src.mastermind import Mastermind
 from src.mastermind import Colors as C
 from src.mastermind import PegColors as PC
-from unittest import mock
-from pytest import fixture
 import pytest
 
-@fixture
-def mastermind():
-    mocked_solution = [C.RED, C.BLUE, C.GREEN, C.YELLOW]
-    with mock.patch("random.choices", return_value=mocked_solution):
-        mastermind = Mastermind()
-        mastermind.new_game()
-        return mastermind
 
 def test_set_solution():
     mastermind = Mastermind(allow_duplicates=False)
@@ -39,7 +30,9 @@ def test_set_solution_with_duplicates_error():
     ([C.RED, C.RED, C.RED, C.RED], [PC.RED, PC.NONE, PC.NONE, PC.NONE]),
     ([C.BLUE, C.RED, C.YELLOW, C.BLACK], [PC.WHITE, PC.WHITE, PC.WHITE, PC.NONE]),
 ])
-def test_get_hint(mastermind, guess, expected_hint):
+def test_get_hint(guess, expected_hint):
+
+    mastermind = Mastermind(allow_duplicates=False)
 
     solution = [C.RED, C.BLUE, C.GREEN, C.YELLOW]
 
@@ -50,6 +43,22 @@ def test_get_hint(mastermind, guess, expected_hint):
     for pc in list(PC):
         assert hint.count(pc) == expected_hint.count(pc)
 
+@pytest.mark.parametrize("guess, expected_hint", [
+    ([C.BLUE, C.RED, C.BLUE, C.RED], [PC.WHITE, PC.WHITE, PC.WHITE, PC.WHITE]),
+    ([C.RED, C.BLUE, C.BLUE, C.RED], [PC.RED, PC.RED, PC.WHITE, PC.WHITE])
+])
+def test_get_hint_with_duplicate_in_solution(guess, expected_hint):
+
+    mastermind = Mastermind(allow_duplicates=True)
+
+    solution = [C.RED, C.BLUE, C.RED, C.BLUE]
+
+    mastermind.set_solution(solution)
+
+    hint = mastermind.get_hint(guess)
+
+    for pc in list(PC):
+        assert hint.count(pc) == expected_hint.count(pc)
 
 def test_get_hint_wikipedia_example():
 

@@ -62,7 +62,7 @@ class Mastermind():
         random.shuffle(hint)
         return hint
 
-    def get_hint(self, guess: List[Colors]) -> List[PegColors]:
+    def get_hint_old2(self, guess: List[Colors]) -> List[PegColors]:
 
         hint = []
         index_and_colors_in_correct_position = set()
@@ -72,14 +72,38 @@ class Mastermind():
                 hint.append(PegColors.RED)
                 index_and_colors_in_correct_position.add((i, color))
 
+        colors_in_correct_position = [c for _, c in index_and_colors_in_correct_position]
+
         for i, color in enumerate(guess):
             if (i, color) in index_and_colors_in_correct_position:
                 continue
-            elif color in self.solution and color not in [c for i, c in index_and_colors_in_correct_position]:
+            elif color in self.solution and color not in colors_in_correct_position:
                 hint.append(PegColors.WHITE)
             else:
                 hint.append(PegColors.NONE)
 
+
+        random.shuffle(hint)
+        return hint
+
+    def get_hint(self, guess: List[Colors]) -> List[PegColors]:
+
+        hint = [PegColors.NONE] * self.code_length
+        solution = self.solution.copy()
+
+        for i, color in enumerate(guess):
+            if color == solution[i]:
+                hint[i] = PegColors.RED
+                solution[i] = None
+
+        for i, color in enumerate(guess):
+            if hint[i] == PegColors.RED:
+                continue
+
+            if color in solution:
+                hint[i] = PegColors.WHITE
+            else:
+                hint[i] = PegColors.NONE
 
         random.shuffle(hint)
         return hint

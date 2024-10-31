@@ -34,7 +34,7 @@ def test_solver_with_correct_first_guess(mastermind):
 
 @pytest.mark.parametrize("mocked_first_guess, expected_iterations", [
     ([Colors.RED, Colors.BLUE, Colors.GREEN, Colors.BLACK], 3),
-    ([Colors.BLACK, Colors.BLUE, Colors.YELLOW, Colors.RED], 4),
+    ([Colors.BLACK, Colors.BLUE, Colors.YELLOW, Colors.RED], 6),
 ])
 def test_solver_with_guess(mastermind, mocked_first_guess, expected_iterations):
 
@@ -58,7 +58,7 @@ def test_solver_no_balls_in_guess(mastermind):
     with mock.patch.object(MastermindSolver, "create_guess", return_value=mocked_first_guess):
         solution, num_iterations = solver.solve()
         assert mastermind.check_solution(solution)
-        assert num_iterations == 5
+        assert num_iterations == 6
 
 def test_solver_one_color_solution(mastermind):
 
@@ -73,7 +73,7 @@ def test_solver_one_color_solution(mastermind):
     with mock.patch.object(MastermindSolver, "create_guess", return_value=mocked_first_guess):
         solution, num_iterations = solver.solve(write_lp_file=True)
         assert mastermind.check_solution(solution)
-        assert num_iterations == 2
+        assert num_iterations == 3
 
 def test_solver_single(mastermind):
 
@@ -114,7 +114,7 @@ def test_solver_num_iterations_no_duplicates():
         total_num_iterations += num_iterations
         max_num_iterations = max(max_num_iterations, num_iterations)
         assert mastermind.check_solution(solution)
-    assert (total_num_iterations, max_num_iterations) == (398, 6)
+    assert (total_num_iterations, max_num_iterations) == (465, 7)
 
 def generate_random_solution_with_duplicates():
     colors = list(Colors)
@@ -142,7 +142,7 @@ def test_solver_num_iterations_only_duplicates():
         total_num_iterations += num_iterations
         max_num_iterations = max(max_num_iterations, num_iterations)
         assert mastermind.check_solution(solution)
-    assert (total_num_iterations, max_num_iterations) == (419, 7)
+    assert (total_num_iterations, max_num_iterations) == (605, 9)
 
 def test_solver_num_iterations_mixed():
 
@@ -159,7 +159,7 @@ def test_solver_num_iterations_mixed():
         total_num_iterations += num_iterations
         max_num_iterations = max(max_num_iterations, num_iterations)
         assert mastermind.check_solution(solution)
-    assert (total_num_iterations, max_num_iterations) == (464, 8)
+    assert (total_num_iterations, max_num_iterations) == (594, 9)
 
 def test_solver_all_color_combinations():
 
@@ -176,4 +176,4 @@ def test_solver_all_color_combinations():
         assert mastermind.check_solution(solution)
         total_num_iterations += num_iterations
         max_num_iterations = max(max_num_iterations, num_iterations)
-    assert (total_num_iterations, max_num_iterations) == (6074, 8)
+    assert (total_num_iterations, max_num_iterations) == (7703, 9)

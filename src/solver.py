@@ -77,8 +77,8 @@ class MastermindSolver:
         # 4. exactly 4 positions and colors are chosen
         # this increases the avg number of iterations to find the solution
         # but decreases the max number of iterations
-        # constraint = pulp.lpSum(x[b][c] for b in ball_ids for c in color_ids) == self.mastermind.code_length, ""
-        # prob += constraint
+        #constraint = pulp.lpSum(x[b][c] for b in ball_ids for c in color_ids) == self.mastermind.code_length, ""
+        #prob += constraint
 
         while any(h != PegColors.RED for h in hint):
             iterations += 1
@@ -91,19 +91,26 @@ class MastermindSolver:
             prob += constraint
 
             # color white represents the number of correct ball colors in the wrong position
-            constraint = pulp.lpSum(y[c] for c in guess) == hint.count(PegColors.WHITE) + hint.count(PegColors.RED) , ""
+            # this cannot be equals because if we have
+            # solution: R,B,R,B
+            # guess:    R,B,R,R
+            # hint:     R,R,R,N
+            # then the following constraint would be
+            #   y[R] + y[B] + y[R] + y[B] == 0+3
+            # but it should be equals to 4, hence we need to use >=
+            constraint = pulp.lpSum(y[c] for c in guess) >= hint.count(PegColors.WHITE) + hint.count(PegColors.RED) , ""
             prob += constraint
 
             # this constraint says that if the hint has a white peg then one of the colors
             # is in the wrong position and hence one of the other ball ids and positions must be larger than the white peg count
 
             # this constraint is not equals due to the following scenario.
-            # assume solution is R,G,B,Y and guess is R,G,B,R then hint is R,R,R,W
+            # assume solution is R,B,R,B and guess is R,B,B,R then hint is R,R,W,W
             # if it was equals this constraint would say that
             #   x[0][R] + x[1][R] + x[2][R] + x[3][R]
-            # + x[0][G] + x[1][G] + x[2][G] + x[3][G]
             # + x[0][B] + x[1][B] + x[2][B] + x[3][B]
-            # + x[0][R] + x[1][R] + x[2][R] + x[3][R] >= 1+3
+            # + x[0][B] + x[1][B] + x[2][B] + x[3][B]
+            # + x[0][R] + x[1][R] + x[2][R] + x[3][R] >= 2+2
             # forcing x[1][R] + x[2][R] + x[3][R]
             #constraint = pulp.lpSum(x[b][c] for i,c in enumerate(guess) for b in ball_ids if i != b) >= hint.count(PegColors.WHITE), f""
             constraint = pulp.lpSum(x[b][c] for c in guess for b in ball_ids) >= hint.count(PegColors.WHITE) + hint.count(PegColors.RED), f""
@@ -113,20 +120,9 @@ class MastermindSolver:
 
             # The following constraints are not necessary and mathematically equivalent to the above constraints.
             # However, they help the solver to find the solution in less iterations for some reason.
-            constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.NONE) + hint.count(PegColors.WHITE), ""
-            prob += constraint
-
-            constraint = pulp.lpSum(1 - y[c] for c in guess) == hint.count(PegColors.NONE) , ""
-            prob += constraint
-
-            #constraint = pulp.lpSum(1 - x[b][c] for i,c in enumerate(guess) for b in ball_ids if i != b) >= 12 - hint.count(PegColors.NONE) - hint.count(PegColors.WHITE), f"lol2_{iterations}"
+            #constraint = pulp.lpSum(1 - x[b][c] for b,c in enumerate(guess)) == hint.count(PegColors.NONE) + hint.count(PegColors.WHITE), ""
             #prob += constraint
 
-
-            # other heuristics
-            # if hint.count(PegColors.RED) == 3 and hint.count(PegColors.WHITE) == 1:
-            #     constraint = pulp.lpSum(y[c] for c in color_ids if c not in guess) == 1, ""
-            #     prob += constraint
 
 
             if write_lp_file:
