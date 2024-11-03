@@ -88,7 +88,7 @@ class Mastermind():
 
     def get_hint(self, guess: List[Colors]) -> List[PegColors]:
 
-        hint = [PegColors.NONE] * self.code_length
+        hint = [None] * self.code_length
         solution = self.solution.copy()
 
         for i, color in enumerate(guess):
@@ -99,9 +99,9 @@ class Mastermind():
         for i, color in enumerate(guess):
             if hint[i] == PegColors.RED:
                 continue
-
-            if color in solution:
+            elif color in solution:
                 hint[i] = PegColors.WHITE
+                solution[solution.index(color)] = None
             else:
                 hint[i] = PegColors.NONE
 
