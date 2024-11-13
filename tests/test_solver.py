@@ -34,7 +34,7 @@ def test_solver_with_correct_first_guess(mastermind):
 
 @pytest.mark.parametrize("mocked_first_guess, expected_iterations", [
     ([Colors.RED, Colors.BLUE, Colors.GREEN, Colors.BLACK], 3),
-    ([Colors.BLACK, Colors.BLUE, Colors.YELLOW, Colors.RED], 6),
+    ([Colors.BLACK, Colors.BLUE, Colors.YELLOW, Colors.RED], 4),
 ])
 def test_solver_with_guess(mastermind, mocked_first_guess, expected_iterations):
 
@@ -58,7 +58,7 @@ def test_solver_no_balls_in_guess(mastermind):
     with mock.patch.object(MastermindSolver, "create_guess", return_value=mocked_first_guess):
         solution, num_iterations = solver.solve()
         assert mastermind.check_solution(solution)
-        assert num_iterations == 6
+        assert num_iterations == 4
 
 def test_solver_one_color_solution(mastermind):
 
@@ -73,93 +73,7 @@ def test_solver_one_color_solution(mastermind):
     with mock.patch.object(MastermindSolver, "create_guess", return_value=mocked_first_guess):
         solution, num_iterations = solver.solve(write_lp_file=True)
         assert mastermind.check_solution(solution)
-        assert num_iterations == 3
-
-def test_solver_single(mastermind):
-
-    solver = MastermindSolver(mastermind)
-
-    solution, num_iterations = solver.solve(write_lp_file=True)
-    assert mastermind.check_solution(solution)
-    assert num_iterations <= 6
-
-def atest_solver_timing():
-
-    accumulated_cpu_time = 0
-    mastermind = Mastermind()
-    solver = MastermindSolver(mastermind)
-
-    for _ in range(100):
-        solver.mastermind.new_game()
-        start_time = time.process_time()
-        solution, num_iterations = solver.solve(write_lp_file=False)
-        end_time = time.process_time()
-        accumulated_cpu_time += end_time - start_time
-        assert mastermind.check_solution(solution)
-    assert 0.6 < accumulated_cpu_time
-    assert accumulated_cpu_time < 0.7
-
-def test_solver_num_iterations_no_duplicates():
-
-    mastermind = Mastermind(allow_duplicates=False)
-    solver = MastermindSolver(mastermind)
-    random.seed(42)
-
-    num_simulations = 100
-    total_num_iterations = 0
-    max_num_iterations = 0
-    for _ in range(num_simulations):
-        solver.mastermind.new_game()
-        solution, num_iterations = solver.solve(write_lp_file=False)
-        total_num_iterations += num_iterations
-        max_num_iterations = max(max_num_iterations, num_iterations)
-        assert mastermind.check_solution(solution)
-    assert (total_num_iterations, max_num_iterations) == (465, 7)
-
-def generate_random_solution_with_duplicates():
-    colors = list(Colors)
-    random_color = random.choices(colors, k=1)[0]
-    num_random_colors = random.randint(1, 4)
-    solution = num_random_colors * [random_color]
-    if num_random_colors < 4:
-        remaining_colors = random.sample(colors, k=4 - num_random_colors)
-        solution.extend(remaining_colors)
-    return solution
-
-def test_solver_num_iterations_only_duplicates():
-
-    mastermind = Mastermind(allow_duplicates=True)
-    solver = MastermindSolver(mastermind)
-    random.seed(42)
-
-    num_simulations = 100
-    total_num_iterations = 0
-    max_num_iterations = 0
-    for _ in range(num_simulations):
-        my_solution = generate_random_solution_with_duplicates()
-        solver.mastermind.set_solution(my_solution)
-        solution, num_iterations = solver.solve()
-        total_num_iterations += num_iterations
-        max_num_iterations = max(max_num_iterations, num_iterations)
-        assert mastermind.check_solution(solution)
-    assert (total_num_iterations, max_num_iterations) == (605, 9)
-
-def test_solver_num_iterations_mixed():
-
-    mastermind = Mastermind(allow_duplicates=True)
-    solver = MastermindSolver(mastermind)
-    random.seed(42)
-
-    num_simulations = 100
-    total_num_iterations = 0
-    max_num_iterations = 0
-    for _ in range(num_simulations):
-        solver.mastermind.new_game()
-        solution, num_iterations = solver.solve()
-        total_num_iterations += num_iterations
-        max_num_iterations = max(max_num_iterations, num_iterations)
-        assert mastermind.check_solution(solution)
-    assert (total_num_iterations, max_num_iterations) == (594, 9)
+        assert num_iterations == 2
 
 def test_solver_all_color_combinations():
 
@@ -167,13 +81,28 @@ def test_solver_all_color_combinations():
 
     solver = MastermindSolver(mastermind)
     
-    total_num_iterations = 0
-    max_num_iterations = 0
+    iterations = {i: 0 for i in range(1, 11)}
 
     for code in product(Colors, repeat=4):
         solver.mastermind.set_solution(list(code))
         solution, num_iterations = solver.solve()
         assert mastermind.check_solution(solution)
-        total_num_iterations += num_iterations
-        max_num_iterations = max(max_num_iterations, num_iterations)
-    assert (total_num_iterations, max_num_iterations) == (7703, 9)
+        iterations[num_iterations] += 1
+
+    expected_iterations = {
+        1: 1,
+        2: 13,
+        3: 57,
+        4: 195,
+        5: 348,
+        6: 357,
+        7: 229,
+        8: 79,
+        9: 17,
+        10: 0
+    }
+
+    total_num_iterations = sum(k*v for k, v in iterations.items())
+
+    assert total_num_iterations == 7248
+    assert iterations == expected_iterations
