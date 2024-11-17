@@ -106,3 +106,37 @@ def test_solver_all_color_combinations():
 
     assert total_num_iterations == 7248
     assert iterations == expected_iterations
+
+# Solution: [<Colors.WHITE: 'WHITE'>, <Colors.WHITE: 'WHITE'>, <Colors.WHITE: 'WHITE'>, <Colors.BLUE: 'BLUE'>]
+# guess_1: [<Colors.RED: 'RED'>, <Colors.BLUE: 'BLUE'>, <Colors.GREEN: 'GREEN'>, <Colors.YELLOW: 'YELLOW'>]
+# hint_1: [<PegColors.NONE: 'NONE'>, <PegColors.WHITE: 'WHITE'>, <PegColors.NONE: 'NONE'>, <PegColors.NONE: 'NONE'>]
+# guess_2: [<Colors.WHITE: 'WHITE'>, <Colors.BLACK: 'BLACK'>, <Colors.RED: 'RED'>, <Colors.BLACK: 'BLACK'>]
+# hint_2: [<PegColors.NONE: 'NONE'>, <PegColors.NONE: 'NONE'>, <PegColors.RED: 'RED'>, <PegColors.NONE: 'NONE'>]
+# guess_3: [<Colors.BLUE: 'BLUE'>, <Colors.RED: 'RED'>, <Colors.RED: 'RED'>, <Colors.GREEN: 'GREEN'>]
+# hint_3: [<PegColors.NONE: 'NONE'>, <PegColors.NONE: 'NONE'>, <PegColors.WHITE: 'WHITE'>, <PegColors.NONE: 'NONE'>]
+# guess_4: [<Colors.WHITE: 'WHITE'>, <Colors.WHITE: 'WHITE'>, <Colors.BLUE: 'BLUE'>, <Colors.BLUE: 'BLUE'>]
+# hint_4: [<PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>, <PegColors.NONE: 'NONE'>]
+# guess_5: [<Colors.WHITE: 'WHITE'>, <Colors.WHITE: 'WHITE'>, <Colors.BLUE: 'BLUE'>, <Colors.WHITE: 'WHITE'>]
+# hint_5: [<PegColors.RED: 'RED'>, <PegColors.WHITE: 'WHITE'>, <PegColors.WHITE: 'WHITE'>, <PegColors.RED: 'RED'>]
+# guess_6: [<Colors.WHITE: 'WHITE'>, <Colors.YELLOW: 'YELLOW'>, <Colors.BLUE: 'BLUE'>, <Colors.BLUE: 'BLUE'>]
+# hint_6: [<PegColors.NONE: 'NONE'>, <PegColors.RED: 'RED'>, <PegColors.NONE: 'NONE'>, <PegColors.RED: 'RED'>]
+# guess_7: [<Colors.WHITE: 'WHITE'>, <Colors.WHITE: 'WHITE'>, <Colors.BLACK: 'BLACK'>, <Colors.BLUE: 'BLUE'>]
+# hint_7: [<PegColors.RED: 'RED'>, <PegColors.NONE: 'NONE'>, <PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>]
+# guess_8: [<Colors.WHITE: 'WHITE'>, <Colors.WHITE: 'WHITE'>, <Colors.YELLOW: 'YELLOW'>, <Colors.BLUE: 'BLUE'>]
+# hint_8: [<PegColors.RED: 'RED'>, <PegColors.NONE: 'NONE'>, <PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>]
+# guess_9: [<Colors.WHITE: 'WHITE'>, <Colors.WHITE: 'WHITE'>, <Colors.WHITE: 'WHITE'>, <Colors.BLUE: 'BLUE'>]
+# hint_9: [<PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>, <PegColors.RED: 'RED'>]
+
+def test_solver_many_iterations_example():
+
+    mastermind = Mastermind(allow_duplicates=True)
+
+    mastermind.set_solution([Colors.WHITE, Colors.WHITE, Colors.WHITE, Colors.BLUE])
+
+    solver = MastermindSolver(mastermind)
+
+    solution, num_iterations = solver.solve()
+
+    assert mastermind.check_solution(solution)
+
+    assert num_iterations == 9

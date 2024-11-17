@@ -146,12 +146,13 @@ class MastermindSolver:
             hint = self.mastermind.get_hint(guess)
             iterations += 1
 
-        if iterations >= 10:
+        if iterations >= 9:
             # write guesses to file
-            with open("tmp/guesses.txt", "w") as f:
+            with open("tmp/guesses.txt", "a") as f:
                 f.write(f"Solution: {self.mastermind.solution}\n")
                 for i,g in enumerate(guesses, start=1):
                     f.write(f"guess_{i}: {g}\n")
                     f.write(f"hint_{i}: {self.mastermind.get_hint(g)}\n")
+                f.write("\n")
 
         return guess, iterations

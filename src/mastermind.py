@@ -1,9 +1,8 @@
 import random
 from typing import List
 from enum import Enum
-from pydantic import BaseModel
 
-#https://webgamesonline.com/codebreaker/rules.php
+# https://webgamesonline.com/codebreaker/rules.php
 
 class Colors(Enum):
     RED: str = "RED"
@@ -23,7 +22,7 @@ class PegColors(Enum):
 class Mastermind():
 
     code_length: int = 4
-    allow_duplicates: bool = False # THIS MUST BE FALSE RIGHT NOW
+    allow_duplicates: bool = False
 
     def __init__(self, code_length: int = 4, allow_duplicates: bool = False):
         self.code_length = code_length
